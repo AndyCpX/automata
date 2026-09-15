@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: nginx-app
+  namespace: default
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/AndyCpX/automata.git
+    path: manifests
+    targetRevision: nginx-deployment
+  destination:
+    server: https://argocd-server:8080
+    namespace: default
+  syncPolicy:
+    automated: true
+    prune: true

@@ -10,7 +10,7 @@ spec:
     path: manifests
     targetRevision: nginx-deployment
   destination:
-    server: https://argocd-server:8080
+    server: https://argocd-server.argocd.svc.cluster.local:8080
     namespace: default
   syncPolicy:
     automated: true

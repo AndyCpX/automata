@@ -1,67 +1,28 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: argocd
----
-apiVersion: appproject.argoproj.io/v1alpha1
-kind: AppProject
-metadata:
-  name: homeassistant-project
-  namespace: argocd
-spec:
-  sourceRepos:
-  - "https://github.com/AndyCpX/automata"
-  destinations:
-  - name: local-cluster
-    namespace: default
-    server: https://local-cluster.default.svc
-  clusterResourceWhitelist:
-  - group: "*"
-    kind: "*"
-  projectResourceWhitelist:
-  - group: "*"
-    kind: "*"
-  userResourceWhitelist:
-  - group: "*"
-    kind: "*"
-  namespaceResourceWhitelist:
-  - group: "*"
-    kind: "*"
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
-    syncOptions:
-    - CreateNamespace=true
-    - PrunePropagationPolicy=foreground
----
+# Home Assistant Application
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   name: homeassistant
-  namespace: default
+  namespace: argocd # <--- CORRETTO: ArgoCD gestisce le App solo nel suo namespace
 spec:
-  destination:
-    name: local-cluster
-    namespace: default
-    server: https://local-cluster.default.svc
   project: homeassistant-project
   source:
-    path: manifests
     repoURL: https://github.com/AndyCpX/automata
+    path: manifests
     targetRevision: ha
+  destination:
+    server: https://kubernetes.default.svc # <--- CORRETTO: URL del cluster interno
+    namespace: default # <--- Il namespace dove verrà installato Home Assistant
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     retry:
+      limit: 3
       backoff:
         duration: 5m
         factor: 2
-        interval: 30s
-        jitter: 10s
         maxDuration: 10m
-      limit: 3
     syncOptions:
-    - CreateNamespace=true
-    - PrunePropagationPolicy=foreground
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
